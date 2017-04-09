@@ -1,0 +1,4 @@
+#!/usr/local/bin/bash
+cp luna_pinyin_simp.custom.yaml $HOME/Library/Rime/
+cp luna_pinyin.extended.dict.yaml $HOME/Library/Rime/
+cp -r luna_pinyin.extended $HOME/Library/Rime/
