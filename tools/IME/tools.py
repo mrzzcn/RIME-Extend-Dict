@@ -154,21 +154,23 @@ class WordDict(dict):
     def dump(self, filename, order = 'pinyin'):
         import datetime
         # 文件头
+        name = filename.split('/').pop()
+        name = name.split('.dict.yaml')[0]
         head = '''# Rime dictionary
 # encoding: utf-8
 #
 # 「Rime词库扩展计划」——为RIME打造一个强大好用的词库
 
 ---
-name: luna_pinyin.extend
+name: %s
 version: "%s"
 sort: by_weight
 use_preset_vocabulary: true
 ...
 
-''' % (datetime.datetime.today().strftime('%Y%m%d'))
+''' % (name, datetime.datetime.today().strftime('%Y%m%d'))
         f = open(filename, 'w')
-        self.zhs_to_zht()
+        # self.zhs_to_zht()
         key = self.keys()
         key.sort()
         f.write(head)

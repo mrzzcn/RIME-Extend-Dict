@@ -23,7 +23,6 @@ if __name__ == '__main__':
     output = parser.output
     #将要转换的词库添加在这里就可以了
     files = parser.files
-    
     d = tools.WordDict()
     for f in files:
         filename, fileext = os.path.splitext(os.path.basename(f))
@@ -41,7 +40,7 @@ if __name__ == '__main__':
             d = worddict.load(f)
 
             # 获取文件名
-            output = filename + ".dict.yaml"
+            output = "./luna_pinyin.extended/luna_pinyin." + filename + ".dict.yaml"
             d.dump(output)
         else:
             d.merge(worddict.load(f))
