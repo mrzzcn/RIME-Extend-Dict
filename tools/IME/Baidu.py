@@ -3,107 +3,70 @@
 
 import struct
 from tools import *
+import binascii
 
 
 class bdict(BaseDictFile):
     def __init__(self):
         BaseDictFile.__init__(self)
-        # 文件头
-        self.head = 'biptbdsw'
-        # 文件终点偏移
-        self.offset = 0x60
-        self.end_position = 0
-        # 词表偏移
-        self.dict_start = 0x350
-        self.shengmu = [ "c", "d", "b", "f", "g", "h", "ch", "j", "k", "l", "m", "n", "", "p", "q", "r", "s", "t", "sh", "zh", "w", "x", "y", "z"]
-        self.yunmu = [ "uang", "iang", "iong", "ang", "eng", "ian", "iao", "ing", "ong", "uai", "uan", "ai", "an", "ao", "ei", "en", "er", "ua", "ie", "in", "iu", "ou", "ia", "ue", "ui", "un", "uo", "a", "e", "i", "o", "u", "v"]
 
-    def _get_word_len(self, data, pos = 0):
-        # 单词长度
-        length = struct.unpack('I', data[pos:pos+4])[0]
-        char = struct.unpack('B', data[pos+4])[0]
-        pure_english = False
-        if 0x41 <= char <= 0x7a:
-            pure_english = True
-        #print(repr(data[pos:pos+length*3+1]))
-        return (length, pure_english)
+        self.fenmu = ["c", "d", "b", "f", "g", "h", "ch", "j", "k", "l", "m", "n", "", "p", "q", "r", "s", "t", "sh",
+                      "zh", "w", "x", "y", "z"]
+        self.yunmu = [ "uang", "iang", "ong", "ang", "eng", "ian", "iao", "ing", "ong", "uai", "uan", "ai", "an", "ao",
+                       "ei","en", "er", "ua", "ie", "in", "iu", "ou", "ia", "ue", "ui", "un", "uo", "a", "e", "i", "a", "u", "v"]
+        pass
 
-    def _get_word(self, data, length = 0, pure_english = False):
-        pos = 0
-        word = Word()
-        pinyin = []
-        for i in xrange(length):
-            char = struct.unpack('B', data[pos])[0]
-            pos += 1
-            if pure_english:
-                # 如果读取到的首个hex值落在字母区域（0x41 ~ 0x7a）内，说明是纯英文，后面的内容直接读取即可
-                pinyin.append(chr(char).lower())
-                word.value += chr(char)
+    def hexToWord(self, hexStr):
+        wordList = []
+        for i in range(0, len(hexStr), 4):
+            word = (chr(int(hexStr[i:i+2], 16)) + chr(int(hexStr[i+2:i+4], 16))).decode('utf-16')
+            if u'\u4e00' <= word <= u'\u9fa5':
+                word = word.encode("utf-8")
+                wordList.append(word)
             else:
-                if char == 0xff:
-                    # 声母部分如果是'\xff'，说明这是中英文混输的英文字母，不需要做拼音词表转换，直接读取韵母部分即可
-                    sm = ''
-                    ym = struct.unpack('c', data[pos])[0]
-                    pos += 1
-                    pinyin.append('' + ym)
-                else:
-                    sm = char
-                    ym = struct.unpack('B', data[pos])[0]
-                    pos += 1
-                    pinyin.append(self.shengmu[sm] + self.yunmu[ym])
-#                    try:
-#                        pinyin.append(self.shengmu[sm] + self.yunmu[ym])
-#                    except IndexError:
-#                        print(repr(data))
-#                        raise IndexError
-        if pure_english:
-            word.pinyin = ' '.join(pinyin)
-        else:
-            word.pinyin = ' '.join(pinyin)
-            hanzi = byte2str(data[pos:pos+ length*2])
-            pos = pos+ length*2
-            word.value = hanzi.encode('utf-8')
-        return word
+                wordList = []
+                break
+        return wordList
 
-    def get_dict_info(self, data):
-        self.end_position = struct.unpack('I', data[self.offset:self.offset+4])[0]
+    def hexToPinyin(self, hexString):
+        pinyinList = []
+        for i in range(0, len(hexString), 4):
+            fenmu = self.fenmu[int(hexString[i:i+2], 16)]
+            yunmu = self.yunmu[int(hexString[i+2:i+4], 16)]
+            pinyinList.append(fenmu+yunmu)
+        return pinyinList
 
+    def read(self, content):
+        hexData = binascii.hexlify(content)
+        hexData = hexData[1696:]
+        text = ""
+        word = Word()
+        #过滤前面信息
+        while True:
+            wordCount = hexData[0:2]
+            wordCount = int(wordCount, 16)
+            text = hexData[8+wordCount*4:8+wordCount*8]
+            text = self.hexToWord(text)
+            if len(text) < 1:
+                break
+            pinyin = hexData[8:8+wordCount*4]
+            pinyin = self.hexToPinyin(pinyin)
+            word = Word()
+            word.value = "".join(text)
+            word.pinyin = " ".join(pinyin)
+            if self.dictionary.has_key(word.pinyin):
+                self.dictionary[word.pinyin].append(word)
+            else:
+                self.dictionary[word.pinyin] = []
+                self.dictionary[word.pinyin].append(word)
+            hexData = hexData[8+wordCount*8:]
+            if len(hexData) < 1:
+                break
 
     def load(self, filename):
-        f = open(filename,'rb')
-        data = f.read()
-        f.close()
-
-        if data[0:8] != self.head:
-            print "It's not a bdict file"
-            sys.exit(1)
-
-        return self.read(data)
-
-    def read(self, data):
-        self.get_dict_info(data)
-
-        pos = self.dict_start
-        while pos < self.end_position:
-#            print(pos, self.end_position)
-#            if pos >= self.end_position:
-#                break
-            # 这里的长度是算字数的，实际长度是 拼音数(length * 2) + 字符长度(length * 2)
-            length, pure_english = self._get_word_len(data, pos = pos)
-            pos += 4
-            #print('*'*60)
-            #print(repr(data[pos:pos+length*4]))
-            if pure_english:
-                word = self._get_word(data[pos:pos+length], length = length, pure_english = True)
-                pos = pos + length
-            else:
-                word = self._get_word(data[pos:pos+length*4], length = length)
-                pos = pos + length * 4
-            if word.value:
-                if self.dictionary.has_key(word.pinyin):
-                    self.dictionary[word.pinyin].append(word)
-                else:
-                    self.dictionary[word.pinyin] = []
-                    self.dictionary[word.pinyin].append(word)
-
+        wordList = []
+        fileText = open(filename, "rb")
+        with fileText as f:
+            content = f.read()
+        self.read(content)
         return self.dictionary
