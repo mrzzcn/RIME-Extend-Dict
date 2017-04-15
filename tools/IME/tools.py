@@ -155,7 +155,7 @@ class WordDict(dict):
         import datetime
         # 文件头
         name = filename.split('/').pop()
-        name = name.split('.dict.yaml')[0]
+        name = name.split('.dict')[0].split('.yaml')[0]
         head = '''# Rime dictionary
 # encoding: utf-8
 #
