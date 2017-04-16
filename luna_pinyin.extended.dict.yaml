@@ -59,4 +59,5 @@ import_tables:
   #感谢这些词库的原作者和原原作者，来源太广（我电脑里的词库样本怕有120多了），很多作者都不大清楚，总之感谢了。
 
   # network dict lib
+  - luna_pinyin.extended/luna_pinyin.baidu_dicts
 ...
