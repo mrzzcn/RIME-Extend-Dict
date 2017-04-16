@@ -7,6 +7,9 @@ import sys
 import binascii
 import pdb
 import os
+import codecs
+import mechanize, fileinput
+
 from IME import *
 from argparse import ArgumentParser
 
@@ -45,4 +48,20 @@ if __name__ == '__main__':
         else:
             d.merge(worddict.load(f))
     if output:
+        filename = os.path.splitext(os.path.basename(output))[0].split('.dict')[0]
         d.dump(output)
+
+    existed = False
+    importFileName = 'luna_pinyin.extended/' + filename;
+    with codecs.open('./luna_pinyin.extended.dict.yaml', 'r', 'utf-8') as extended :
+        lines = extended.readlines()
+        existed = any(line.find(importFileName)>=0 for line in lines)
+
+    print(existed)
+
+    with codecs.open('./luna_pinyin.extended.dict.yaml', 'w', 'utf-8') as extended :
+        for line in lines:
+            extended.write(line)
+            if line.find("  # network dict lib")>=0 and not existed:
+                extended.write('  - ' + importFileName + '\n')
+
