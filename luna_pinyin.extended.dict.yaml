@@ -26,7 +26,7 @@ import_tables:
   - luna_pinyin.extended/luna_pinyin.poetry #常用诗词，来源于唐宋诗词、千家詩、花間集、楚辭、詩經。 2.6w
   - luna_pinyin.extended/luna_pinyin.cn_en    #中英混合词条，含如哆啦A梦之类的词条，目前词库很小。
 
-  - luna_pinyin.extended/luna_pinyin.baidu
+  # - luna_pinyin.extended/luna_pinyin.baidu # 个人百度输入法词库, 可从百度输入法导出
   - luna_pinyin.extended/luna_pinyin.sogou
 
   # 以下两个通用扩展词库任选其一启用即可
