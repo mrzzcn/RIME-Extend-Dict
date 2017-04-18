@@ -59,4 +59,4 @@ target/
 .DS_Store
 download/
 test.py
-./luna_pinyin.extended/luna_pinyin.baidu.dict.yaml
+luna_pinyin.extended/luna_pinyin.baidu.dict.yaml
