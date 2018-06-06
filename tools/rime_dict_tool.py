@@ -35,6 +35,8 @@ if __name__ == '__main__':
             worddict = Ziguang.uwl()
         elif fileext.lower() == '.bdict':
             worddict = Baidu.bdict()
+        elif fileext.lower() == '.txt':
+            worddict = Thuocl.thuocl()
         else:
             raise Exception("File type not supported yet.")
 

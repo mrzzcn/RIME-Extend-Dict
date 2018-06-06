@@ -4,3 +4,4 @@
 import Sougou
 import Ziguang
 import Baidu
+import Thuocl
