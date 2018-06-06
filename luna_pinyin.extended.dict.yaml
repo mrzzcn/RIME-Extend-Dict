@@ -38,7 +38,7 @@ import_tables:
   - luna_pinyin.extended/luna_pinyin.city_chongqing    # 重庆地理信息词库，包含重庆的常用地名
   - luna_pinyin.extended/luna_pinyin.universities      # 国内高校名称词库
   - luna_pinyin.extended/luna_pinyin.net    #网络流行词，网上聊天常用的语句。3.6w
-  #- luna_pinyin.extended/luna_pinyin.gd   #粤语词库，广东人必备。1.2w
+  - luna_pinyin.extended/luna_pinyin.gd   #粤语词库，广东人必备。1.2w
   - luna_pinyin.extended/luna_pinyin.game  #游戏词库、单机/网游及相关词条。7k
   - luna_pinyin.extended/luna_pinyin.moba   #Moba游戏用词，含LOL和DOTA及它的亲爹—魔兽的词条。5k
   - luna_pinyin.extended/luna_pinyin.game_wow          # 魔兽世界词库
@@ -59,5 +59,6 @@ import_tables:
   #感谢这些词库的原作者和原原作者，来源太广（我电脑里的词库样本怕有120多了），很多作者都不大清楚，总之感谢了。
 
   # network dict lib
+  - luna_pinyin.extended/luna_pinyin.thuocl
   - luna_pinyin.extended/luna_pinyin.baidu_dicts
 ...
