@@ -8,14 +8,16 @@ import binascii
 import pdb
 import os
 import codecs
-import mechanize, fileinput
-
-from IME import *
+from IME import tools, Sougou, Baidu, Ziguang, Thuocl
+# from IME import *
 from argparse import ArgumentParser
 
+
 def argparser():
-    parser = ArgumentParser(description="Convert from other word dictionary to RIME's yaml dictionary format, support multiple types.")
-    parser.add_argument('-o', '--output', type=str, default='', help='Write ALL results to spicified file, otherwise write into separate files with original name.')
+    parser = ArgumentParser(
+        description="Convert from other word dictionary to RIME's yaml dictionary format, support multiple types.")
+    parser.add_argument('-o', '--output', type=str, default='',
+                        help='Write ALL results to spicified file, otherwise write into separate files with original name.')
     parser.add_argument('files', nargs='+', type=str, help='Dictionary files')
     return parser.parse_args()
 
@@ -24,7 +26,7 @@ if __name__ == '__main__':
 
     parser = argparser()
     output = parser.output
-    #将要转换的词库添加在这里就可以了
+    # 将要转换的词库添加在这里就可以了
     files = parser.files
     d = tools.WordDict()
     for f in files:
@@ -40,7 +42,6 @@ if __name__ == '__main__':
         else:
             raise Exception("File type not supported yet.")
 
-
         if not output:
             d = worddict.load(f)
 
@@ -55,15 +56,14 @@ if __name__ == '__main__':
 
     existed = False
     importFileName = 'luna_pinyin.extended/' + filename;
-    with codecs.open('./luna_pinyin.extended.dict.yaml', 'r', 'utf-8') as extended :
+    with codecs.open('./luna_pinyin.extended.dict.yaml', 'r', 'utf-8') as extended:
         lines = extended.readlines()
-        existed = any(line.find(importFileName)>=0 for line in lines)
+        existed = any(line.find(importFileName) >= 0 for line in lines)
 
     print(existed)
 
-    with codecs.open('./luna_pinyin.extended.dict.yaml', 'w', 'utf-8') as extended :
+    with codecs.open('./luna_pinyin.extended.dict.yaml', 'w', 'utf-8') as extended:
         for line in lines:
             extended.write(line)
-            if line.find("  # network dict lib")>=0 and not existed:
+            if line.find("  # network dict lib") >= 0 and not existed:
                 extended.write('  - ' + importFileName + '\n')
-

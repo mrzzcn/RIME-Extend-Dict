@@ -7,7 +7,7 @@
 # @Last Modified time: 2018-06-06 16:29:04
 
 import struct
-from tools import *
+from . tools import BaseDictFile
 import binascii
 
 class thuocl(BaseDictFile):
@@ -41,8 +41,8 @@ class thuocl(BaseDictFile):
         return pinyinList
 
     def read(self, content):
-        print "reading"
-        print content
+        # print "reading"
+        # print content
         words = content.split("\n");
         index = 0
         total = len(words)

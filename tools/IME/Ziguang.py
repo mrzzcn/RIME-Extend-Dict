@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import struct
-from tools import *
+from . tools import BaseDictFile
 
 class uwl(BaseDictFile):
     def __init__(self):

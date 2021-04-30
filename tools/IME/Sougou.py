@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import struct
-from tools import *
+from . tools import BaseDictFile
 
 
 #搜狗的scel词库就是保存的文本的unicode编码，每两个字节一个字符（中文汉字或者英文字母）
@@ -153,7 +153,7 @@ class scel(BaseDictFile):
         f.close()
 
         if data[0:12] != self.head:
-            print "It's not a .scel file"
+            # print "It's not a .scel file"
             sys.exit(1)
 
         return self.read(data)

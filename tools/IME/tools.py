@@ -19,6 +19,7 @@ def which(program):
                 return exe_file
     return None
 
+
 def get_locale():
     import locale
     if locale.getlocale()[1]:
@@ -27,18 +28,18 @@ def get_locale():
         return locale.getdefaultlocale()[1]
 
 
-def is_cjk (strings):
+def is_cjk(strings):
     from string import printable
     valid = False
     ascii_range = {
-        'ASCII'                        : [u'\x00',u'\x7f']
+        'ASCII': [u'\x00', u'\x7f']
     }
     cjk_range = {
-        'CJK Unified Ideographs block' : [u'\u4E00',u'\u9FCC'],
-        'CJKUI Ext A block'            : [u'\u3400',u'\u4DB5'],
-        'CJKUI Ext B block'            : [u'\u20000',u'\u2A6D6'],
-        'CJKUI Ext C block'            : [u'\u2A700',u'\u2B734'],
-        'CJKUI Ext D block'            : [u'\u2B740',u'\u2B81D']
+        'CJK Unified Ideographs block': [u'\u4E00', u'\u9FCC'],
+        'CJKUI Ext A block': [u'\u3400', u'\u4DB5'],
+        'CJKUI Ext B block': [u'\u20000', u'\u2A6D6'],
+        'CJKUI Ext C block': [u'\u2A700', u'\u2B734'],
+        'CJKUI Ext D block': [u'\u2B740', u'\u2B81D']
     }
     if type(strings) != type(unicode()):
         strings = unicode(strings, 'utf-8')
@@ -46,13 +47,14 @@ def is_cjk (strings):
         valid = False
         for j in cjk_range.keys():
             if i >= cjk_range[j][0] and i <= cjk_range[j][1]:
-                #print(i.encode('utf-8'), cjk_range[j])
+                # print(i.encode('utf-8'), cjk_range[j])
                 valid = True
             elif i in printable:
                 valid = True
         if not valid:
             return valid
     return valid
+
 
 def byte2str(data):
     '''将原始字节码转为字符串'''
@@ -61,14 +63,15 @@ def byte2str(data):
     length = len(data)
     ret = u''
     while i < length:
-        x = data[i] + data[i+1]
-        t = unichr(struct.unpack('H',x)[0])
+        x = data[i] + data[i + 1]
+        t = unichr(struct.unpack('H', x)[0])
         if t == u'\r':
             ret += u'\n'
         elif t != u' ':
             ret += t
         i += 2
     return ret
+
 
 def uniq(l):
     tmp_dict = {}
@@ -80,14 +83,17 @@ def uniq(l):
             tmp_dict[key].count += i.count
     return tmp_dict.values()
 
+
 class Word(object):
     def __init__(self, value='', encoding='utf-8', count=0):
         self.value = value
         self.count = count
         self.pinyin = None
         self.encoding = encoding
+
     def __repr__(self):
         return self.value
+
 
 class WordDict(dict):
     def _opencc(self, string):
@@ -98,19 +104,19 @@ class WordDict(dict):
             raise Exception('opencc command line tool could not found in $PATH')
         p = subprocess.Popen([opencc_exec], stdin=subprocess.PIPE, stdout=subprocess.PIPE, shell=False)
         result, error = p.communicate(string)
-#        result = subprocess.check_output([opencc_exec, '-i', filename], shell=False)
+        #        result = subprocess.check_output([opencc_exec, '-i', filename], shell=False)
         return result.rstrip()
 
     def zhs_to_zht(self):
         """Translate characters from Simplified Chinese into Traditional Chinese"""
-        #from tempfile import NamedTemporaryFile
-        #tempfile = NamedTemporaryFile(mode='rw', bufsize=0)
+        # from tempfile import NamedTemporaryFile
+        # tempfile = NamedTemporaryFile(mode='rw', bufsize=0)
         tmp_string = ''
         for key in self.keys():
             w = []
             for i in xrange(len(self[key])):
                 w.append(self[key][i].value)
-            tmp_string += key + ':' + '\t'.join(w)+'\n'
+            tmp_string += key + ':' + '\t'.join(w) + '\n'
         #    tempfile.write(line)
         tmp_string = self._opencc(tmp_string)
         for line in tmp_string.split('\n'):
@@ -118,9 +124,10 @@ class WordDict(dict):
             words = words.split('\t')
             for i in xrange(len(self[key])):
                 self[key][i].value = words[i]
-#            self[key] = map(self._opencc, self[key])
-#            for i in xrange(len(self[key])):
-#                self[key][i].value = self._opencc(self[key][i].value)
+
+    #            self[key] = map(self._opencc, self[key])
+    #            for i in xrange(len(self[key])):
+    #                self[key][i].value = self._opencc(self[key][i].value)
 
     def add(self, key, w):
         if not self.has_key(key):
@@ -150,8 +157,7 @@ class WordDict(dict):
             for i in dictionary.keys():
                 self.add(i, dictionary[i])
 
-
-    def dump(self, filename, order = 'pinyin'):
+    def dump(self, filename, order='pinyin'):
         import datetime
         # 文件头
         name = filename.split('/').pop()
@@ -171,13 +177,14 @@ use_preset_vocabulary: true
 ''' % (name, datetime.datetime.today().strftime('%Y%m%d'))
         f = open(filename, 'w')
         # self.zhs_to_zht()
-        key = self.keys()
+        key = list(self.keys())
         key.sort()
         f.write(head)
         for k in key:
-            line = '\n'.join(map(lambda x: x+'\t'+k, self.word(k)))+'\n'
+            line = '\n'.join(map(lambda x: x + '\t' + k, self.word(k))) + '\n'
             f.write(line)
         f.close()
+
 
 class BaseDictFile(object):
     def __init__(self):

@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import struct
-from tools import *
+from . tools import *
 import binascii
 
 
@@ -18,8 +18,18 @@ class bdict(BaseDictFile):
 
     def hexToWord(self, hexStr):
         wordList = []
+        print('hexToWord', hexStr)
         for i in range(0, len(hexStr), 4):
-            word = (chr(int(hexStr[i:i+2], 16)) + chr(int(hexStr[i+2:i+4], 16))).decode('utf-16')
+            print('[i:i+2] %s [i+2:i+4] %s' % (hexStr[i:i+2], hexStr[i+2:i+4]))
+            print('[i:i+2] %s [i+2:i+4] %s' % (
+                chr(int(str(hexStr[i:i+2], 'utf-8'), 16)),
+                chr(int(str(hexStr[i+2:i+4], 'utf-8'), 16))
+            ))
+            word = chr(
+                    int(str(hexStr[i:i+2], 'utf-8'), 16)
+                    +
+                    int(str(hexStr[i+2:i+4], 'utf-8'), 16)
+            )
             if u'\u4e00' <= word <= u'\u9fa5':
                 word = word.encode("utf-8")
                 wordList.append(word)
@@ -54,7 +64,7 @@ class bdict(BaseDictFile):
             word = Word()
             word.value = "".join(text)
             word.pinyin = " ".join(pinyin)
-            if self.dictionary.has_key(word.pinyin):
+            if word.pinyin in self.dictionary:
                 self.dictionary[word.pinyin].append(word)
             else:
                 self.dictionary[word.pinyin] = []
