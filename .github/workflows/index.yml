@@ -18,7 +18,7 @@ jobs:
       - name: Make runnable
         run: chmod +x ./download.sh
       - name: Download dicts
-        run: ./download.sh
+        run: "${GITHUB_WORKSPACE}/download.sh"
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
