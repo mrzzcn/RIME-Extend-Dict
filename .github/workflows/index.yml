@@ -29,11 +29,12 @@ jobs:
           python ./tools/rime_dict_tool.py ./download/*.bdict -o=./luna_pinyin.extended/luna_pinyin.baidu_dicts.dict.yaml
 
       - name: Release
+        id: release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: "${{ steps.current-time.outputs.formattedTime }}"
           files: |
             ./luna_pinyin.extended.dict.yaml
-            ./luna_pinyin.extended/
+            ./luna_pinyin.extended/*.yaml
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
