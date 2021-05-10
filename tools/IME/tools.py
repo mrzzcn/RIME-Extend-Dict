@@ -77,7 +77,7 @@ def uniq(l):
     tmp_dict = {}
     for i in l:
         key = i.value
-        if not tmp_dict.has_key(key):
+        if not key in tmp_dict:
             tmp_dict[key] = i
         else:
             tmp_dict[key].count += i.count
@@ -130,12 +130,12 @@ class WordDict(dict):
     #                self[key][i].value = self._opencc(self[key][i].value)
 
     def add(self, key, w):
-        if not self.has_key(key):
+        if not key in self:
             self[key] = []
         if type(w) == Word:
             self[key].append(w)
         elif type(w) == list:
-            self[key] = self[key] + w
+            self[key] = [*self[key], *w]
         else:
             raise TypeError
         self[key] = uniq(self[key])
@@ -155,7 +155,9 @@ class WordDict(dict):
             if type(dictionary) != WordDict:
                 raise TypeError('Expect WordDict but get %s' % (type(dictionary)))
             for i in dictionary.keys():
+                # print('Merge %s' % args)
                 self.add(i, dictionary[i])
+                # print('merge->keys: %s' % len(self.keys()))
 
     def dump(self, filename, order='pinyin'):
         import datetime
@@ -179,6 +181,7 @@ use_preset_vocabulary: true
         # self.zhs_to_zht()
         key = list(self.keys())
         key.sort()
+        print('dump->keys: %s' % len(self.keys()))
         f.write(head)
         for k in key:
             line = '\n'.join(map(lambda x: x + '\t' + k, self.word(k))) + '\n'

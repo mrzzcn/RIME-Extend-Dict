@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import struct
-from . tools import *
+from .tools import *
 import binascii
 
 
@@ -12,26 +12,18 @@ class bdict(BaseDictFile):
 
         self.fenmu = ["c", "d", "b", "f", "g", "h", "ch", "j", "k", "l", "m", "n", "", "p", "q", "r", "s", "t", "sh",
                       "zh", "w", "x", "y", "z"]
-        self.yunmu = [ "uang", "iang", "ong", "ang", "eng", "ian", "iao", "ing", "ong", "uai", "uan", "ai", "an", "ao",
-                       "ei","en", "er", "ua", "ie", "in", "iu", "ou", "ia", "ue", "ui", "un", "uo", "a", "e", "i", "a", "u", "v"]
+        self.yunmu = ["uang", "iang", "ong", "ang", "eng", "ian", "iao", "ing", "ong", "uai", "uan", "ai", "an", "ao",
+                      "ei", "en", "er", "ua", "ie", "in", "iu", "ou", "ia", "ue", "ui", "un", "uo", "a", "e", "i", "a",
+                      "u", "v"]
         pass
 
     def hexToWord(self, hexStr):
         wordList = []
-        print('hexToWord', hexStr)
         for i in range(0, len(hexStr), 4):
-            print('[i:i+2] %s [i+2:i+4] %s' % (hexStr[i:i+2], hexStr[i+2:i+4]))
-            print('[i:i+2] %s [i+2:i+4] %s' % (
-                chr(int(str(hexStr[i:i+2], 'utf-8'), 16)),
-                chr(int(str(hexStr[i+2:i+4], 'utf-8'), 16))
-            ))
-            word = chr(
-                    int(str(hexStr[i:i+2], 'utf-8'), 16)
-                    +
-                    int(str(hexStr[i+2:i+4], 'utf-8'), 16)
-            )
+            if len(hexStr[i:i + 4]) < 4:
+                break
+            word = binascii.a2b_hex(hexStr[i:i + 4]).decode('utf-16')
             if u'\u4e00' <= word <= u'\u9fa5':
-                word = word.encode("utf-8")
                 wordList.append(word)
             else:
                 wordList = []
@@ -41,9 +33,9 @@ class bdict(BaseDictFile):
     def hexToPinyin(self, hexString):
         pinyinList = []
         for i in range(0, len(hexString), 4):
-            fenmu = self.fenmu[int(hexString[i:i+2], 16)]
-            yunmu = self.yunmu[int(hexString[i+2:i+4], 16)]
-            pinyinList.append(fenmu+yunmu)
+            fenmu = self.fenmu[int(hexString[i:i + 2], 16)]
+            yunmu = self.yunmu[int(hexString[i + 2:i + 4], 16)]
+            pinyinList.append(fenmu + yunmu)
         return pinyinList
 
     def read(self, content):
@@ -51,15 +43,18 @@ class bdict(BaseDictFile):
         hexData = hexData[1696:]
         text = ""
         word = Word()
-        #过滤前面信息
+        # 过滤前面信息
         while True:
             wordCount = hexData[0:2]
+            if len(wordCount) < 1:
+                break
             wordCount = int(wordCount, 16)
-            text = hexData[8+wordCount*4:8+wordCount*8]
+            text = hexData[8 + wordCount * 4:8 + wordCount * 8]
             text = self.hexToWord(text)
+            # print('Read: %s' % text)
             if len(text) < 1:
                 break
-            pinyin = hexData[8:8+wordCount*4]
+            pinyin = hexData[8:8 + wordCount * 4]
             pinyin = self.hexToPinyin(pinyin)
             word = Word()
             word.value = "".join(text)
@@ -69,7 +64,7 @@ class bdict(BaseDictFile):
             else:
                 self.dictionary[word.pinyin] = []
                 self.dictionary[word.pinyin].append(word)
-            hexData = hexData[8+wordCount*8:]
+            hexData = hexData[8 + wordCount * 8:]
             if len(hexData) < 1:
                 break
 
@@ -79,4 +74,5 @@ class bdict(BaseDictFile):
         with fileText as f:
             content = f.read()
         self.read(content)
+        # print('Read complete: %s items total' % len(self.dictionary.keys()))
         return self.dictionary
