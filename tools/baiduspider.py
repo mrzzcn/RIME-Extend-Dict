@@ -9,7 +9,7 @@ from multiprocessing import Pool
 
 host = "https://shurufa.baidu.com"
 archives_url = host + "/dict"
-
+downloadPath = './download'
 debug = ['人名专区']
 categories = []
 
@@ -75,6 +75,8 @@ def processTag(tag):
 
 
 def download_dicts():
+    if not os.path.exists(downloadPath):
+        mkdir(downloadPath)
     pool = Pool(8)
     total = len(dicts)
     results = pool.map(download_dict, dicts, 1)
@@ -89,10 +91,8 @@ def download_dict(dict):
     # originDict = dicts[indexOfDict]
     #
     # originDict.status = 'loading'
-    if not os.path.exists('./download'):
-        mkdir('./download')
 
-    downloadFilePath = './download/%s.bdict' % dict.innerId
+    downloadFilePath = '%s/%s.bdict' % (downloadPath, dict.innerId)
 
     try:
         urllib.request.urlretrieve(dict.href, downloadFilePath)
@@ -102,7 +102,6 @@ def download_dict(dict):
     # originDict.status = "loaded"
     # loaded = sum(1 for d in dicts if d.status == "loaded")
     print('下载完成: %s %s ' %(dict.innerId, dict.text))
-
 
 def mkdir(path):
     # 去除首位空格
