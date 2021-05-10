@@ -15,10 +15,11 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Make runnable
-        run: chmod +x ./download.sh
       - name: Download dicts
-        run: sh "${GITHUB_WORKSPACE}/download.sh"
+        run: |
+          python ./tools/baiduspider.py
+          python ./tools/rime_dict_tool.py ./download/*.bdict -o=./luna_pinyin.extended/luna_pinyin.baidu_dicts.dict.yaml
+
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
