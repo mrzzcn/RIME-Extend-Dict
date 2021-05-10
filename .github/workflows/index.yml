@@ -15,18 +15,26 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+
       - name: Get current time
         uses: 1466587594/get-current-time@v2
         id: current-time
         with:
           format: YYYY-MM-DD
           utcOffset: "+08:00"
+
       - name: Install Requirements
         run: pip install -r requirements.txt
+
       - name: Download dicts
         run: |
           python ./tools/baiduspider.py
           python ./tools/rime_dict_tool.py ./download/*.bdict -o=./luna_pinyin.extended/luna_pinyin.baidu_dicts.dict.yaml
+
+      - name: Pack outputs
+        uses: montudor/action-zip@v1
+        with:
+          args: zip -qq -r Dicts.zip luna_pinyin.extended luna_pinyin.extended.dict.yaml
 
       - name: Release
         id: release
@@ -34,7 +42,6 @@ jobs:
         with:
           tag_name: "${{ steps.current-time.outputs.formattedTime }}"
           files: |
-            ./luna_pinyin.extended.dict.yaml
-            ./luna_pinyin.extended/*.yaml
+            ./Dicts.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
