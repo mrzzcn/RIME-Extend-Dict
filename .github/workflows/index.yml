@@ -15,7 +15,9 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Download
+      - name: Make runnable
+        run: chmod +x ./download.sh
+      - name: Download dicts
         run: ./download.sh
       - name: Release
         uses: softprops/action-gh-release@v1
