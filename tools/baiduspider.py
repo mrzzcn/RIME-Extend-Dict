@@ -10,7 +10,7 @@ from multiprocessing import Pool
 host = "https://shurufa.baidu.com"
 archives_url = host + "/dict"
 
-debug = []
+debug = ['人名专区']
 categories = []
 
 dicts = []
