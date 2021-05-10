@@ -1,0 +1,22 @@
+name: Main
+
+on:
+  schedule:
+    - cron:  '0 0 0 0 1'
+
+jobs:
+  build:
+    runs-on: 3.10.0b1-alpine3.13
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Download
+        run: ./download.sh
+      - name: Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ./luna_pinyin.extended.dict.yaml
+            ./luna_pinyin.extended/
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
