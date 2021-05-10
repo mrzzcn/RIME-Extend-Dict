@@ -16,7 +16,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v2
       - name: Set Version
-        run: echo "$Version::$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_ENV
+        run: echo "Version::$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_ENV
       - name: Install Requirements
         run: pip install -r requirements.txt
       - name: Download dicts
