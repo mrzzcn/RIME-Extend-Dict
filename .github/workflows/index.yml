@@ -15,8 +15,12 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Set Version
-        run: echo "Version::$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_ENV
+      - name: Get current time
+        uses: 1466587594/get-current-time@v2
+        id: current-time
+        with:
+          format: YYYY-MM-DD
+          utcOffset: "+08:00"
       - name: Install Requirements
         run: pip install -r requirements.txt
       - name: Download dicts
@@ -27,7 +31,7 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: $Version
+          tag_name: "${{ steps.current-time.outputs.formattedTime }}"
           files: |
             ./luna_pinyin.extended.dict.yaml
             ./luna_pinyin.extended/
