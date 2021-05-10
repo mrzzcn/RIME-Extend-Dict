@@ -15,6 +15,8 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
+      - name: Set Version
+        run: echo "$Version::$(date +'%Y-%m-%dT%H:%M:%S')" >> $GITHUB_ENV
       - name: Install Requirements
         run: pip install -r requirements.txt
       - name: Download dicts
@@ -25,6 +27,7 @@ jobs:
       - name: Release
         uses: softprops/action-gh-release@v1
         with:
+          tag_name: $Version
           files: |
             ./luna_pinyin.extended.dict.yaml
             ./luna_pinyin.extended/
