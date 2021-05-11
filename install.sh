@@ -5,11 +5,11 @@ DICTS_DIRECTORY=$(mktemp -d)
 # release=http://127.0.0.1/Dicts.zip
 release=https://github.com/mrzzcn/RIME-Extend-Dict/releases/latest/download/Dicts.zip
 
+curl -L $release --output "$DICTS_DIRECTORY/Dicts.zip"
+
 cp -r $HOME/Library/Rime/luna_pinyin.extended.dict.yaml $HOME/Library/Rime/luna_pinyin.extended.dict.yaml.bak
 
 echo '~/Library/Rime/luna_pinyin.extended.dict.yaml backed up to: ~/Library/Rime/luna_pinyin.extended.dict.yaml.bak'
-
-curl -L $release --output "$DICTS_DIRECTORY/Dicts.zip"
 
 echo "Unzip: $DICTS_DIRECTORY/Dicts.zip"
 unzip -qq "$DICTS_DIRECTORY/Dicts.zip" -d "$DICTS_DIRECTORY"
