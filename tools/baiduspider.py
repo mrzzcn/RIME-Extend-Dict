@@ -11,7 +11,7 @@ from pypinyin import pinyin, Style
 host = "https://shurufa.baidu.com"
 archives_url = host + "/dict"
 downloadPath = './download'
-debug = ['人名专区', '娱乐休闲']
+debug = []
 categories = []
 
 dicts = []
