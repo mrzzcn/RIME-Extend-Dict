@@ -1,12 +1,25 @@
 #!/usr/local/bin/bash
 
-curl -L https://github.com/mrzzcn/RIME-Extend-Dict/releases/latest/download/Dicts.zip --output Dicts.zip
+DICTS_DIRECTORY=$(mktemp -d)
 
-unzip -qq Dicts.zip
-rm Dicts.zip
+# release=http://127.0.0.1/Dicts.zip
+release=https://github.com/mrzzcn/RIME-Extend-Dict/releases/latest/download/Dicts.zip
 
-cp -r luna_pinyin.extended $HOME/Library/Rime/
-cp luna_pinyin.extended.dict.yaml $HOME/Library/Rime/
+cp -r $HOME/Library/Rime/luna_pinyin.extended.dict.yaml $HOME/Library/Rime/luna_pinyin.extended.dict.yaml.bak
+
+echo '~/Library/Rime/luna_pinyin.extended.dict.yaml backed up to: ~/Library/Rime/luna_pinyin.extended.dict.yaml.bak'
+
+curl -L $release --output "$DICTS_DIRECTORY/Dicts.zip"
+
+echo "Unzip: $DICTS_DIRECTORY/Dicts.zip"
+unzip -qq "$DICTS_DIRECTORY/Dicts.zip" -d "$DICTS_DIRECTORY"
+
+echo "Installing..."
+cp -r "$DICTS_DIRECTORY/luna_pinyin.extended" $HOME/Library/Rime/
+cp "$DICTS_DIRECTORY/luna_pinyin.extended.dict.yaml" $HOME/Library/Rime/
+
+echo "Clean up: $DICTS_DIRECTORY"
+rm -rf "$DICTS_DIRECTORY/"
 
 osascript -e '
 display notification "Download & Install successfully, Deploy by Click Icon -> Deploy." with title "Squirrel"
