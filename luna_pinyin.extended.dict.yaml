@@ -60,5 +60,4 @@ import_tables:
 
   # network dict lib
   - luna_pinyin.extended/luna_pinyin.thuocl
-  - luna_pinyin.extended/luna_pinyin.baidu_dicts
 ...
