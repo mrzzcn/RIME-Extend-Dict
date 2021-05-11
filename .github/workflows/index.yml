@@ -29,7 +29,6 @@ jobs:
       - name: Download dicts
         run: |
           python ./tools/baiduspider.py
-          python ./tools/rime_dict_tool.py ./download/*.bdict -o=./luna_pinyin.extended/luna_pinyin.baidu_dicts.dict.yaml
 
       - name: Pack outputs
         uses: montudor/action-zip@v1
