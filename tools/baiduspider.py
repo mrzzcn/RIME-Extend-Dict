@@ -6,11 +6,12 @@ import bs4
 import urllib.request
 import os
 from multiprocessing import Pool
+from pypinyin import pinyin, Style
 
 host = "https://shurufa.baidu.com"
 archives_url = host + "/dict"
 downloadPath = './download'
-debug = ['人名专区']
+debug = ['人名专区', '娱乐休闲']
 categories = []
 
 dicts = []
@@ -18,6 +19,7 @@ dicts = []
 
 class Dict():
     def __init__(self):
+        self.directory = ''
         self.text = ''
         self.innerId = ''
         self.samples = ''
@@ -45,6 +47,7 @@ def processCategory(cate):
     print('找到 %s 个二级分类' % len(subCategories))
     for tagAnchor in subCategories:
         tag = {
+            "category": cate,
             "text": str(tagAnchor.get_text()).replace("\n", "").replace("\r", ""),
             "href": host + tagAnchor.attrs["href"] + '&orderby=download',
             "dicts": []
@@ -62,6 +65,7 @@ def processTag(tag):
     for d in soup1.select("div.dict-list-info table tr"):
         dict1 = Dict()
         cells = d.find_all('td')
+        dict1.directory = tag['category']['pinyin']
         dict1.text = str(cells[0].find_all('a')[0].string).replace("\n", "").replace("\r", "")
         dict1.innerId = cells[4].find_all("a")[0].attrs["dict-innerid"]
         dict1.samples = str(cells[1].get_text()).replace("\n", "").replace("\r", "")
@@ -75,8 +79,6 @@ def processTag(tag):
 
 
 def download_dicts():
-    if not os.path.exists(downloadPath):
-        mkdir(downloadPath)
     pool = Pool(8)
     total = len(dicts)
     results = pool.map(download_dict, dicts, 1)
@@ -92,7 +94,7 @@ def download_dict(dict):
     #
     # originDict.status = 'loading'
 
-    downloadFilePath = '%s/%s.bdict' % (downloadPath, dict.innerId)
+    downloadFilePath = '%s/%s/%s.bdict' % (downloadPath, dict.directory, dict.innerId)
 
     try:
         urllib.request.urlretrieve(dict.href, downloadFilePath)
@@ -131,17 +133,22 @@ def start_parse(url):
     soup = loadPage(url)
     # soup = bs4.BeautifulSoup(response.text);
 
-    # 为了防止漏掉调用close方法，这里使用了with语句
-    # 写入到文件中的编码为utf-8
-    # with open('archives.txt', 'w') as f :
+    if not os.path.exists(downloadPath):
+        mkdir(downloadPath)
+    
     for archive in soup.select("li p.sort-title a"):
         print(host + archive.attrs["href"])
+        pinyinParts = pinyin(str(archive.get_text()).replace('\n', ''), style=Style.NORMAL)
+        pinyinStr = [item for sublist in pinyinParts for item in sublist]
         tag = {
             "text": str(archive.get_text()).replace('\n', ''),
             "href": host + archive.attrs["href"],
+            "pinyin": ''.join(pinyinStr),
             "status": "ready",
             "type": "category"
         }
+        if not os.path.exists('%s/%s' % (downloadPath, tag['pinyin'])):
+            mkdir('%s/%s' % (downloadPath, tag['pinyin']))
         if len(debug) < 1 or tag["text"] in debug:
             categories.append(tag)
             print('已识别 %s ' % tag["text"])
@@ -152,6 +159,12 @@ def start_parse(url):
     print("搜索完成 %s " % len(dicts))
     download_dicts()
 
+    for cate in categories:
+        print('Parsering %s' % cate['text'])
+        os.system("python ./tools/rime_dict_tool.py %s -o=./luna_pinyin.extended/luna_pinyin.baidu_%s.dict.yaml" % (
+            "./download/%s/*.bdict" % cate['pinyin'],
+            cate['pinyin'],
+        ))
 
 # 当命令行运行该模块时，__name__等于'__main__'
 # 其他模块导入该模块时，__name__等于'parse_html'
