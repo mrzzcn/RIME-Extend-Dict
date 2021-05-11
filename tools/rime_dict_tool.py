@@ -61,7 +61,7 @@ if __name__ == '__main__':
     finalDicts = manager.WordDict()
 
     processor = functools.partial(processDict, finalDicts=finalDicts)
-    with Pool(processes=cpu_count() - 1) as pool:
+    with Pool(processes=max(cpu_count() - 1, 8)) as pool:
         r = list(tqdm.tqdm(pool.imap_unordered(processor, files), total=total))
         if output:
             filename = os.path.splitext(os.path.basename(output))[0].split('.dict')[0]

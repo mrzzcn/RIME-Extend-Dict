@@ -8,6 +8,7 @@ import os
 from multiprocessing import Pool, cpu_count
 from pypinyin import pinyin, Style
 import tqdm
+import math
 
 host = "https://shurufa.baidu.com"
 archives_url = host + "/dict"
@@ -81,7 +82,7 @@ def processTag(tag):
 
 def download_dicts():
     total = len(dicts)
-    with Pool(processes=cpu_count() - 1) as pool:
+    with Pool(processes=max(cpu_count() - 1, 8)) as pool:
         r = list(tqdm.tqdm(pool.imap_unordered(download_dict, dicts), total=total))
 
 def download_dict(dict):
