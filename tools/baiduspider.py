@@ -5,8 +5,9 @@ import requests
 import bs4
 import urllib.request
 import os
-from multiprocessing import Pool
+from multiprocessing import Pool, cpu_count
 from pypinyin import pinyin, Style
+import tqdm
 
 host = "https://shurufa.baidu.com"
 archives_url = host + "/dict"
@@ -32,19 +33,19 @@ class Dict():
 
 
 def loadPage(url):
-    print("loading %s ..." % url)
+    # print("loading %s ..." % url)
     response = requests.get(url)
-    print("loaded")
+    # print("loaded")
     return bs4.BeautifulSoup(response.content.decode("utf-8"), "html.parser")
 
 
 def processCategory(cate):
     # for cate in categories :
     cate["tags"] = []
-    print('开始处理 %s' % cate['text'])
+    # print('开始处理 %s' % cate['text'])
     soup = loadPage(cate["href"])
     subCategories = soup.select("div.dict-list div.tag_contain a[data-stats*='webDictListPage.category']")
-    print('找到 %s 个二级分类' % len(subCategories))
+    # print('找到 %s 个二级分类' % len(subCategories))
     for tagAnchor in subCategories:
         tag = {
             "category": cate,
@@ -53,14 +54,14 @@ def processCategory(cate):
             "dicts": []
         }
         cate["tags"].append(tag)
-        print('已识别标签 %s: %s' % (tag["text"], tag["href"]))
+        # print('已识别标签 %s: %s' % (tag["text"], tag["href"]))
         processTag(tag)
 
 
 def processTag(tag):
     # for cate in categories :
     #   for tag in cate["tags"] :
-    print('开始分析标签 %s ' % tag['text'])
+    # print('开始分析标签 %s ' % tag['text'])
     soup1 = loadPage(tag["href"])
     for d in soup1.select("div.dict-list-info table tr"):
         dict1 = Dict()
@@ -74,36 +75,32 @@ def processTag(tag):
         dict1.href = host + "/dict_innerid_download?innerid=" + str(cells[4].find_all("a")[0].attrs["dict-innerid"])
         dict1.status = "ready"
         tag["dicts"].append(dict1)
-        print("已识别词典 %s: %s " % (dict1.text, dict1.href))
+        # print("已识别词典 %s: %s " % (dict1.text, dict1.href))
         dicts.append(dict1)
 
 
 def download_dicts():
-    pool = Pool(8)
     total = len(dicts)
-    results = pool.map(download_dict, dicts, 1)
-    pool.close()
-
+    with Pool(processes=cpu_count() - 1) as pool:
+        r = list(tqdm.tqdm(pool.imap_unordered(download_dict, dicts), total=total))
 
 def download_dict(dict):
-    print('开始下载: %s %s ' % (dict.innerId, dict.text))
-
+    # print('开始下载: %s %s ' % (dict.innerId, dict.text))
     # indexOfDict = next((i for i, item in enumerate(dicts) if str(item.innerId) == str(dict.innerId)), -1)
     #
     # originDict = dicts[indexOfDict]
     #
     # originDict.status = 'loading'
-
     downloadFilePath = '%s/%s/%s.bdict' % (downloadPath, dict.directory, dict.innerId)
 
     try:
         urllib.request.urlretrieve(dict.href, downloadFilePath)
     except:
         print('下载失败: %s %s ' % (dict.innerId, dict.text))
-
     # originDict.status = "loaded"
     # loaded = sum(1 for d in dicts if d.status == "loaded")
-    print('下载完成: %s %s ' %(dict.innerId, dict.text))
+    # print('下载完成: %s %s ' %(dict.innerId, dict.text))
+
 
 def mkdir(path):
     # 去除首位空格
@@ -151,7 +148,7 @@ def start_parse(url):
             mkdir('%s/%s' % (downloadPath, tag['pinyin']))
         if len(debug) < 1 or tag["text"] in debug:
             categories.append(tag)
-            print('已识别 %s ' % tag["text"])
+            # print('已识别 %s ' % tag["text"])
             processCategory(tag)
         else:
             print('Skip %s ' % tag["text"])
